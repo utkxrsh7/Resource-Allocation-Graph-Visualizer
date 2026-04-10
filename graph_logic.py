@@ -35,3 +35,17 @@ class ResourceAllocationGraph:
             return
         self.resources.add(name)
         self.graph.add_node(name, kind="resource")
+
+    def add_request(self, process, resource):
+        """Add a request edge process → resource between existing or new nodes."""
+        # Ensure both endpoints exist with the correct types
+        self.add_process(process)
+        self.add_resource(resource)
+        # Directed edge from process to resource models a request
+        self.graph.add_edge(process, resource, kind="request")
+
+    def detect_deadlock(self):
+        """Return True if the directed graph has a cycle (deadlock), else False."""
+        if self.graph.number_of_nodes() == 0:
+            return False
+        return not nx.is_directed_acyclic_graph(self.graph)

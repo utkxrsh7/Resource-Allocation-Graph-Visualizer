@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Resource Allocation Graph</title>
+</head>
+<body>
+
+<h1>Resource Allocation Graph Visualizer</h1>
+
+{% if deadlock %}
+
+<h3 style="color:red;">⚠️ Deadlock Detected!</h3>
+{% else %}
+<h3 style="color:green;">✅ No Deadlock</h3>
+{% endif %}
+
+<form method="POST">
+    <label>Process:</label>
+    <input type="text" name="process" required>
+
+    <label>Resource:</label>
+    <input type="text" name="resource" required>
+
+    <button type="submit">Add</button>
+</form>
+
+<form method="GET" action="/graph">
+    <button type="submit">Show Graph</button>
+</form>
+
+<hr>
+
+<h2>Processes:</h2>
+<ul>
+    {% for p in processes %}
+        <li>{{ p }}</li>
+    {% endfor %}
+</ul>
+
+<h2>Resources:</h2>
+<ul>
+    {% for r in resources %}
+        <li>{{ r }}</li>
+    {% endfor %}
+</ul>
+
+{% if graph_url %}
+<hr>
+<h2>Current Graph:</h2>
+<img src="{{ graph_url }}" alt="Resource Allocation Graph" style="max-width: 100%; height: auto;">
+{% endif %}
+
+</body>
+</html>
