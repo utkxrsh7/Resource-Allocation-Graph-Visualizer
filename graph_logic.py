@@ -50,6 +50,34 @@ class ResourceAllocationGraph:
         self.add_process(process)
         self.graph.add_edge(resource, process, kind="allocation")
 
+    def reset(self):
+        """Remove all processes, resources, and edges."""
+        self.graph.clear()
+        self.processes.clear()
+        self.resources.clear()
+
+    def remove_process(self, name):
+        """Remove a process node and all incident edges. No-op if unknown or empty."""
+        if not name or not isinstance(name, str):
+            return
+        name = name.strip()
+        if not name or name not in self.processes:
+            return
+        self.processes.discard(name)
+        if name in self.graph:
+            self.graph.remove_node(name)
+
+    def remove_resource(self, name):
+        """Remove a resource node and all incident edges. No-op if unknown or empty."""
+        if not name or not isinstance(name, str):
+            return
+        name = name.strip()
+        if not name or name not in self.resources:
+            return
+        self.resources.discard(name)
+        if name in self.graph:
+            self.graph.remove_node(name)
+
     def detect_deadlock(self):
         """Return True if the directed graph has a cycle (deadlock), else False."""
         if self.graph.number_of_nodes() == 0:

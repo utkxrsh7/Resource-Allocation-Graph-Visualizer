@@ -17,12 +17,20 @@ rag = ResourceAllocationGraph()
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
-        process = request.form["process"]
-        resource = request.form["resource"]
         action = request.form.get("action", "request")
-        if action == "request":
+        if action == "reset":
+            rag.reset()
+        elif action == "delete_process":
+            rag.remove_process(request.form.get("node", ""))
+        elif action == "delete_resource":
+            rag.remove_resource(request.form.get("node", ""))
+        elif action == "request":
+            process = request.form["process"]
+            resource = request.form["resource"]
             rag.add_request(process, resource)
         elif action == "allocation":
+            process = request.form["process"]
+            resource = request.form["resource"]
             rag.add_allocation(resource, process)
 
     return render_template(
