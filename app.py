@@ -19,8 +19,11 @@ def home():
     if request.method == "POST":
         process = request.form["process"]
         resource = request.form["resource"]
-        # Register nodes and add a request edge process → resource
-        rag.add_request(process, resource)
+        action = request.form.get("action", "request")
+        if action == "request":
+            rag.add_request(process, resource)
+        elif action == "allocation":
+            rag.add_allocation(resource, process)
 
     return render_template(
         "index.html",
@@ -66,8 +69,36 @@ def show_graph():
             ax=ax,
         )
 
-    # Draw directed edges (if any)
-    nx.draw_networkx_edges(rag.graph, pos, arrowstyle="->", arrowsize=15, ax=ax)
+    request_edges = [
+        (u, v)
+        for u, v, d in rag.graph.edges(data=True)
+        if d.get("kind") == "request"
+    ]
+    allocation_edges = [
+        (u, v)
+        for u, v, d in rag.graph.edges(data=True)
+        if d.get("kind") == "allocation"
+    ]
+    if request_edges:
+        nx.draw_networkx_edges(
+            rag.graph,
+            pos,
+            edgelist=request_edges,
+            edge_color="black",
+            arrowstyle="->",
+            arrowsize=15,
+            ax=ax,
+        )
+    if allocation_edges:
+        nx.draw_networkx_edges(
+            rag.graph,
+            pos,
+            edgelist=allocation_edges,
+            edge_color="green",
+            arrowstyle="->",
+            arrowsize=15,
+            ax=ax,
+        )
 
     # Draw labels for all nodes
     nx.draw_networkx_labels(rag.graph, pos, font_size=9, ax=ax)

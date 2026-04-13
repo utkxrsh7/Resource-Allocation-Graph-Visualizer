@@ -44,6 +44,12 @@ class ResourceAllocationGraph:
         # Directed edge from process to resource models a request
         self.graph.add_edge(process, resource, kind="request")
 
+    def add_allocation(self, resource, process):
+        """Add an allocation edge resource → process between existing or new nodes."""
+        self.add_resource(resource)
+        self.add_process(process)
+        self.graph.add_edge(resource, process, kind="allocation")
+
     def detect_deadlock(self):
         """Return True if the directed graph has a cycle (deadlock), else False."""
         if self.graph.number_of_nodes() == 0:

@@ -15,14 +15,32 @@
 {% endif %}
 
 <form method="POST">
+    <input type="hidden" name="action" value="request">
     <label>Process:</label>
     <input type="text" name="process" required>
 
     <label>Resource:</label>
     <input type="text" name="resource" required>
 
-    <button type="submit">Add</button>
+    <button type="submit">Add Request</button>
 </form>
+
+<form method="POST">
+    <input type="hidden" name="action" value="allocation">
+    <label>Process:</label>
+    <input type="text" name="process" required>
+
+    <label>Resource:</label>
+    <input type="text" name="resource" required>
+
+    <button type="submit">Add Allocation</button>
+</form>
+
+<p><strong>Legend:</strong></p>
+<ul style="list-style: none; padding-left: 0;">
+    <li><span style="color: black;">&#8594;</span> Black arrow = Request</li>
+    <li><span style="color: green;">&#8594;</span> Green arrow = Allocation</li>
+</ul>
 
 <form method="GET" action="/graph">
     <button type="submit">Show Graph</button>
