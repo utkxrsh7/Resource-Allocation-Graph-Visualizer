@@ -78,6 +78,22 @@ class ResourceAllocationGraph:
         if name in self.graph:
             self.graph.remove_node(name)
 
+    def get_cycle_nodes(self):
+        """
+        Return an ordered list of nodes on one directed cycle (circular wait), or [] if none.
+        Uses nx.find_cycle on the directed graph (same condition as detect_deadlock).
+        """
+        if self.graph.number_of_nodes() == 0:
+            return []
+        try:
+            edges = nx.find_cycle(self.graph)
+        except nx.NetworkXNoCycle:
+            return []
+        if not edges:
+            return []
+        # edges: [(u0,u1), (u1,u2), ..., (uk-1, u0)] — list unique vertices in order
+        return [edges[0][0]] + [e[1] for e in edges[:-1]]
+
     def detect_deadlock(self):
         """Return True if the directed graph has a cycle (deadlock), else False."""
         if self.graph.number_of_nodes() == 0:

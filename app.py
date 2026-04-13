@@ -14,6 +14,22 @@ app = Flask(__name__)
 rag = ResourceAllocationGraph()
 
 
+def cycle_path_string(rag):
+    """Human-readable closed path for circular wait, or empty string if none."""
+    nodes = rag.get_cycle_nodes()
+    if not nodes:
+        return ""
+    return " → ".join(nodes + [nodes[0]])
+
+
+def cycle_edge_set(nodes):
+    """Set of (u, v) directed edges for the closed walk given ordered cycle nodes."""
+    if not nodes:
+        return set()
+    n = len(nodes)
+    return {(nodes[i], nodes[(i + 1) % n]) for i in range(n)}
+
+
 @app.route("/", methods=["GET", "POST"])
 def home():
     if request.method == "POST":
@@ -38,7 +54,7 @@ def home():
         processes=list(rag.processes),
         resources=list(rag.resources),
         graph_url=None,
-        deadlock=rag.detect_deadlock(),
+        cycle_path=cycle_path_string(rag),
     )
 
 
@@ -87,22 +103,49 @@ def show_graph():
         for u, v, d in rag.graph.edges(data=True)
         if d.get("kind") == "allocation"
     ]
-    if request_edges:
+    on_cycle = cycle_edge_set(rag.get_cycle_nodes())
+
+    req_normal = [e for e in request_edges if e not in on_cycle]
+    req_wait = [e for e in request_edges if e in on_cycle]
+    alloc_normal = [e for e in allocation_edges if e not in on_cycle]
+    alloc_wait = [e for e in allocation_edges if e in on_cycle]
+
+    if req_normal:
         nx.draw_networkx_edges(
             rag.graph,
             pos,
-            edgelist=request_edges,
+            edgelist=req_normal,
             edge_color="black",
             arrowstyle="->",
             arrowsize=15,
             ax=ax,
         )
-    if allocation_edges:
+    if alloc_normal:
         nx.draw_networkx_edges(
             rag.graph,
             pos,
-            edgelist=allocation_edges,
+            edgelist=alloc_normal,
             edge_color="green",
+            arrowstyle="->",
+            arrowsize=15,
+            ax=ax,
+        )
+    if req_wait:
+        nx.draw_networkx_edges(
+            rag.graph,
+            pos,
+            edgelist=req_wait,
+            edge_color="red",
+            arrowstyle="->",
+            arrowsize=15,
+            ax=ax,
+        )
+    if alloc_wait:
+        nx.draw_networkx_edges(
+            rag.graph,
+            pos,
+            edgelist=alloc_wait,
+            edge_color="red",
             arrowstyle="->",
             arrowsize=15,
             ax=ax,
@@ -123,7 +166,7 @@ def show_graph():
         processes=list(rag.processes),
         resources=list(rag.resources),
         graph_url="/static/graph.png",
-        deadlock=rag.detect_deadlock(),
+        cycle_path=cycle_path_string(rag),
     )
 
 

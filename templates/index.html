@@ -267,6 +267,10 @@
             background: #2ecc71;
         }
 
+        .legend-line.circular-wait {
+            background: #e74c3c;
+        }
+
         .pill-list {
             display: flex;
             flex-wrap: wrap;
@@ -365,10 +369,10 @@
         <div class="container">
             <h1>Resource Allocation Graph Visualizer</h1>
 
-            {% if deadlock %}
-            <div class="status status-deadlock">⚠️ Deadlock Detected!</div>
+            {% if cycle_path %}
+            <div class="status status-deadlock">⚠ Circular Wait Detected: {{ cycle_path }}</div>
             {% else %}
-            <div class="status status-ok">✅ No Deadlock</div>
+            <div class="status status-ok">✅ No Circular Wait</div>
             {% endif %}
 
             <section class="card" aria-labelledby="form-request-title">
@@ -421,6 +425,10 @@
                     <div class="legend-row">
                         <span class="legend-line allocation" aria-hidden="true"></span>
                         <span>Green line → Allocation</span>
+                    </div>
+                    <div class="legend-row">
+                        <span class="legend-line circular-wait" aria-hidden="true"></span>
+                        <span>Red line → Circular wait (cycle)</span>
                     </div>
                 </div>
             </section>
